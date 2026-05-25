@@ -1,0 +1,28 @@
+{
+	"schemaVersion": 1,
+	"id": "sideaccess",
+	"version": "${version}",
+	"name": "Side Access",
+	"description": "Tab between nearby workstations without closing the screen. Press a key to switch to the previous/next crafting interface in your workshop.",
+	"authors": [
+		"Side Access"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/sideaccess/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.sideaccess.client.SideAccessClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.2",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
