@@ -56,6 +56,9 @@ public final class NavState {
      */
     private static int activationTicksLeft = 0;
 
+    /** Queued switch direction (-1/+1), performed on the next client tick; 0 means none queued. */
+    private static int pendingSwitchDir = 0;
+
     private NavState() {}
 
     // --- anchor handling ---------------------------------------------------
@@ -67,6 +70,17 @@ public final class NavState {
     public static void tick() {
         if (switchGuard > 0) {
             switchGuard--;
+            // During the close→reopen gap the screen is momentarily null, so vanilla would let a
+            // physically-held A/D latch into the movement keybinds. Keep them released until the
+            // destination screen opens.
+            suppressMovementKeys();
+        }
+        // Perform any queued switch here — in the client tick, NOT inside the input handler that
+        // requested it (see requestSwitch for why).
+        if (pendingSwitchDir != 0) {
+            int dir = pendingSwitchDir;
+            pendingSwitchDir = 0;
+            performSwitch(dir);
         }
     }
 
@@ -200,6 +214,7 @@ public final class NavState {
         activationTicksLeft = 0;
         pendingSlide = false;
         pendingAnchor = null;
+        pendingSwitchDir = 0;
         return false;
     }
 
@@ -223,8 +238,33 @@ public final class NavState {
         return ordered.get(idx);
     }
 
-    /** Switch to the previous (-1) or next (+1) workstation. */
-    public static void switchTo(int direction) {
+    /**
+     * Queue a switch to the previous (-1) or next (+1) workstation. The actual screen change runs
+     * on the next client tick (via {@link #tick()}), <b>not</b> immediately.
+     * <p>
+     * <b>Why deferred:</b> the key/mouse handlers fire in the middle of vanilla's input dispatch
+     * ({@code KeyboardHandler.keyPress}). That method only latches a key into the movement
+     * keybindings when {@code Minecraft.screen == null}. If we closed the screen here
+     * ({@code setScreen(null)}), the rest of the same dispatch would observe a null screen and
+     * register the held A/D as movement, strafing the player. Deferring keeps the screen non-null
+     * for the remainder of the input event, so the press is never seen as movement.
+     *
+     * @return true if the input was consumed (the caller should cancel the event)
+     */
+    public static boolean requestSwitch(int direction) {
+        if (!active || ordered.size() < 2) {
+            return false;
+        }
+        if (pendingSwitchDir == 0) {
+            // Immediate audio feedback for responsiveness; the slide kicks off on the new screen.
+            playSwitchSound(direction, RemoteAccessConfig.get());
+        }
+        pendingSwitchDir = direction;
+        return true;
+    }
+
+    /** Performs a queued switch. Always called from the client tick, never from an input handler. */
+    private static void performSwitch(int direction) {
         if (!active || ordered.size() < 2) {
             return;
         }
@@ -250,7 +290,7 @@ public final class NavState {
                 return;
             }
             currentIndex = Math.min(currentIndex, ordered.size() - 1);
-            switchTo(direction);
+            performSwitch(direction);
             return;
         }
 
@@ -258,14 +298,15 @@ public final class NavState {
         pendingAnchor = target.pos();
         switchGuard = 5;
 
-        // Kick off the carousel feedback: remember the direction and play the swipe sound now
-        // (immediately, for responsiveness — the slide itself starts when the new screen opens).
+        // Remember the direction so the destination screen slides in the right way.
         lastSwitchDir = direction;
         pendingSlide = true;
-        playSwitchSound(direction, config);
 
         // 1. Close the current handled screen (sends a legitimate container-close packet).
         mc.setScreen(null);
+        // The screen is momentarily null now; make sure no movement key counts as held while we
+        // reopen, so closing or holding A/D can never leak into player movement.
+        suppressMovementKeys();
 
         // 2. Replay a real block interaction. Server validates reach and opens the target menu.
         gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hitResultFor(target.pos()));
@@ -275,6 +316,19 @@ public final class NavState {
             player.displayClientMessage(
                     Component.translatable("remoteaccess.switched", target.displayName()), true);
         }
+    }
+
+    /**
+     * Force the movement keybinds to "not held". Belt-and-suspenders for the brief window where the
+     * screen is null mid-switch: even if vanilla latched a held A/D, this clears it so the player
+     * never strafes while navigating.
+     */
+    private static void suppressMovementKeys() {
+        var options = Minecraft.getInstance().options;
+        options.keyUp.setDown(false);
+        options.keyDown.setDown(false);
+        options.keyLeft.setDown(false);
+        options.keyRight.setDown(false);
     }
 
     private static BlockHitResult hitResultFor(BlockPos pos) {

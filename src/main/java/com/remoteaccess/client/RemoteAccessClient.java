@@ -77,12 +77,17 @@ public final class RemoteAccessClient {
         }
         RemoteAccessConfig config = RemoteAccessConfig.get();
         int key = event.getKeyCode();
+        // Consume the key (so it never reaches the screen or movement) and queue the switch for the
+        // next tick — switching synchronously here would briefly null the screen mid-keyPress and
+        // let vanilla latch A/D into movement. See NavState#requestSwitch.
         if (key == config.prevKeyCode()) {
-            NavState.switchTo(-1);
-            event.setCanceled(true); // consume — never leaks into movement
+            if (NavState.requestSwitch(-1)) {
+                event.setCanceled(true);
+            }
         } else if (key == config.nextKeyCode()) {
-            NavState.switchTo(1);
-            event.setCanceled(true);
+            if (NavState.requestSwitch(1)) {
+                event.setCanceled(true);
+            }
         }
     }
 
@@ -94,11 +99,13 @@ public final class RemoteAccessClient {
         }
         int side = RemoteAccessHud.iconHit(screen, event.getMouseX(), event.getMouseY(), RemoteAccessConfig.get());
         if (side == RemoteAccessHud.SIDE_PREV) {
-            NavState.switchTo(-1);
-            event.setCanceled(true);
+            if (NavState.requestSwitch(-1)) {
+                event.setCanceled(true);
+            }
         } else if (side == RemoteAccessHud.SIDE_NEXT) {
-            NavState.switchTo(1);
-            event.setCanceled(true);
+            if (NavState.requestSwitch(1)) {
+                event.setCanceled(true);
+            }
         }
     }
 

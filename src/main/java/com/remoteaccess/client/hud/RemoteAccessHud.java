@@ -80,7 +80,7 @@ public final class RemoteAccessHud {
         graphics.drawCenteredString(font, letter, letterX, letterY, LETTER_COLOR);
 
         if (hover) {
-            graphics.setTooltipForNextFrame(ws.displayName(), mouseX, mouseY);
+            graphics.renderTooltip(font, ws.displayName(), mouseX, mouseY);
         }
     }
 

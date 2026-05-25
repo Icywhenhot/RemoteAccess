@@ -2,7 +2,7 @@ package com.remoteaccess.client.workstation;
 
 import com.remoteaccess.client.config.RemoteAccessConfig;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -47,7 +47,7 @@ public final class WorkstationRegistry {
             return false;
         }
         if (!config.blacklist.isEmpty()) {
-            Identifier id = BuiltInRegistries.BLOCK.getKey(block);
+            ResourceLocation id = BuiltInRegistries.BLOCK.getKey(block);
             return !config.blacklist.contains(id.toString());
         }
         return true;
