@@ -33,11 +33,13 @@ bin/
 Thumbs.db
 Desktop.ini
 
-# fabric / loom
+# neoforge / moddev
 
 run/
-.loom-cache/
-remappedSrc/
+runs/
+run-data/
+repo/
+src/generated/**/.cache/
 
 # java
 

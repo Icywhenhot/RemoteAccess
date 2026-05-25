@@ -3,7 +3,7 @@ package com.remoteaccess.client.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.fml.loading.FMLPaths;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,7 +120,7 @@ public final class RemoteAccessConfig {
     }
 
     private static Path path() {
-        return FabricLoader.getInstance().getConfigDir().resolve("remoteaccess.json");
+        return FMLPaths.CONFIGDIR.get().resolve("remoteaccess.json");
     }
 
     private static RemoteAccessConfig load() {

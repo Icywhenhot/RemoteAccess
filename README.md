@@ -1,6 +1,6 @@
 # Remote Access
 
-A lightweight, client-side quality-of-life mod for Minecraft **26.1.2** (Fabric). It lets you tab
+A lightweight, client-side quality-of-life mod for Minecraft **26.1.2** (NeoForge). It lets you tab
 between nearby workstations without ever closing the screen — your whole workshop behaves like tabs
 in one interface.
 
@@ -73,7 +73,7 @@ Results are cached for the life of the screen. There is no ticking world-scan lo
 - `nav/NavState` — live navigation state + the legitimate switch (close → re-interact).
 - `hud/RemoteAccessHud` — left/right icons, hover tooltips, click targets.
 - `config/RemoteAccessConfig` — JSON config.
-- `RemoteAccessClient` — wires Fabric screen/keyboard/mouse/use-block events together.
+- `RemoteAccessClient` — `@Mod` entrypoint; wires NeoForge screen/keyboard/mouse/interaction events together.
 
 ## License
 

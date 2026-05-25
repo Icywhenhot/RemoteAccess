@@ -1,0 +1,33 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+logoFile="assets/remoteaccess/icon.png"
+authors="Remote Access"
+description='''
+A lightweight, client-side quality-of-life mod. While a workstation screen is open, tab between nearby workstations (crafting table, anvil, enchanting table, etc.) without closing the screen. Switching replays a genuine block-use interaction, so any vanilla-behaving server accepts it; no server-side mod is required.
+'''
+
+# This mod is purely client-side. It can be installed alongside a vanilla server, and you can
+# join servers that do not have it. The displayTest below tells NeoForge not to require a
+# version match (or even presence) on the other side of the connection.
+[[mods.displayTest]]
+displayTest="IGNORE_ALL_VERSION"
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="[${neo_version},)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="CLIENT"
