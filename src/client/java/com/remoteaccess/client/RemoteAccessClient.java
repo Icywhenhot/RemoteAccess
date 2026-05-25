@@ -101,8 +101,7 @@ public class RemoteAccessClient implements ClientModInitializer {
                 return true;
             });
 
-            // 26.1.2 uses retained-mode rendering: overlays draw in the "extract" phase.
-            ScreenEvents.afterExtract(screen).register((scr, graphics, mouseX, mouseY, tickDelta) ->
+            ScreenEvents.afterRender(screen).register((scr, graphics, mouseX, mouseY, tickDelta) ->
                     RemoteAccessHud.render(scr, graphics, mouseX, mouseY, RemoteAccessConfig.get()));
         });
     }

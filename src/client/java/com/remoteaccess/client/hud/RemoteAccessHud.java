@@ -5,7 +5,7 @@ import com.remoteaccess.client.nav.NavState;
 import com.remoteaccess.client.workstation.Workstation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 
 /**
@@ -34,7 +34,7 @@ public final class RemoteAccessHud {
 
     private RemoteAccessHud() {}
 
-    public static void render(Screen screen, GuiGraphicsExtractor graphics, int mouseX, int mouseY, RemoteAccessConfig config) {
+    public static void render(Screen screen, GuiGraphics graphics, int mouseX, int mouseY, RemoteAccessConfig config) {
         if (!config.showIcons || !NavState.isActive()) {
             return;
         }
@@ -58,7 +58,7 @@ public final class RemoteAccessHud {
         drawIcon(graphics, font, next, rightX, slide, y, frame, mouseX, mouseY, "D", now, Math.PI);
     }
 
-    private static void drawIcon(GuiGraphicsExtractor graphics, Font font, Workstation ws,
+    private static void drawIcon(GuiGraphics graphics, Font font, Workstation ws,
                                  int restX, int slide, int y, int frame, int mouseX, int mouseY,
                                  String letter, long now, double bobPhase) {
         int x = restX + slide;
@@ -66,18 +66,18 @@ public final class RemoteAccessHud {
         boolean hover = mouseX >= restX && mouseX < restX + frame && mouseY >= y && mouseY < y + frame;
 
         graphics.fill(x, y, x + frame, y + frame, FRAME_BG);
-        graphics.outline(x, y, frame, frame, hover ? FRAME_BORDER_HOVER : FRAME_BORDER);
+        graphics.renderOutline(x, y, frame, frame, hover ? FRAME_BORDER_HOVER : FRAME_BORDER);
 
         // Centre the 16x16 item render within the frame.
         int itemX = x + (frame - 16) / 2;
         int itemY = y + (frame - 16) / 2;
-        graphics.item(ws.icon(), itemX, itemY);
+        graphics.renderItem(ws.icon(), itemX, itemY);
 
         // Key letter centred above the icon, with a gentle vertical bob.
         double bob = Math.sin(now / HOVER_PERIOD_MS * (Math.PI * 2.0) + bobPhase) * HOVER_AMPLITUDE;
         int letterX = x + frame / 2;
         int letterY = (int) Math.round(y - font.lineHeight - LETTER_GAP + bob);
-        graphics.centeredText(font, letter, letterX, letterY, LETTER_COLOR);
+        graphics.drawCenteredString(font, letter, letterX, letterY, LETTER_COLOR);
 
         if (hover) {
             graphics.setTooltipForNextFrame(ws.displayName(), mouseX, mouseY);

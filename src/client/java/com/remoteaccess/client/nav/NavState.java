@@ -272,8 +272,8 @@ public final class NavState {
 
         // 3. Optional subtle feedback (action-bar / overlay text).
         if (config.showSwitchMessage) {
-            player.sendOverlayMessage(
-                    Component.translatable("remoteaccess.switched", target.displayName()));
+            player.displayClientMessage(
+                    Component.translatable("remoteaccess.switched", target.displayName()), true);
         }
     }
 
