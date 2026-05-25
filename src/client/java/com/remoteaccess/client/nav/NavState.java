@@ -15,6 +15,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -48,18 +49,19 @@ public final class NavState {
     /** Set on a switch, consumed when the destination screen activates, to kick off its slide. */
     private static boolean pendingSlide = false;
 
+    /**
+     * Remaining ticks to keep retrying activation after a switchable screen opens. Covers the case
+     * where {@link net.fabricmc.fabric.api.event.player.UseBlockCallback} fires slightly after the
+     * screen's init, so the anchor isn't ready on the very first frame.
+     */
+    private static int activationTicksLeft = 0;
+
     private NavState() {}
 
     // --- anchor handling ---------------------------------------------------
 
     public static void setPendingAnchor(BlockPos pos) {
         pendingAnchor = pos;
-    }
-
-    public static BlockPos consumePendingAnchor() {
-        BlockPos p = pendingAnchor;
-        pendingAnchor = null;
-        return p;
     }
 
     public static void tick() {
@@ -98,44 +100,106 @@ public final class NavState {
     }
 
     /**
-     * Try to (re)build navigation state for a freshly opened workstation screen.
+     * Begin trying to activate for a freshly opened switchable screen. Opens a short retry window
+     * (see {@link #activationTicksLeft}) and attempts immediately.
+     */
+    public static void beginActivation(LocalPlayer player) {
+        activationTicksLeft = 8;
+        activate(player);
+    }
+
+    /** Per-tick retry while a switchable screen is open but we haven't activated yet. */
+    public static void retryTick(LocalPlayer player) {
+        if (active || activationTicksLeft <= 0) {
+            return;
+        }
+        activationTicksLeft--;
+        activate(player);
+    }
+
+    /**
+     * (Re)build navigation state for the open switchable screen.
      *
      * @return true if at least two workstations are reachable and the HUD/keys should be active
      */
     public static boolean activate(LocalPlayer player) {
-        BlockPos anchor = consumePendingAnchor();
-        if (anchor == null) {
-            return deactivate();
-        }
         RemoteAccessConfig config = RemoteAccessConfig.get();
-        BlockState state = player.level().getBlockState(anchor);
-        if (!WorkstationRegistry.isWorkstation(state, config)) {
-            return deactivate();
+        boolean wasSwitch = pendingSlide;
+        BlockPos anchor = resolveAnchor(player, wasSwitch, config);
+        pendingAnchor = null; // consume regardless of outcome to avoid stale anchors
+
+        if (anchor == null) {
+            clearActive();
+            return false;
         }
 
         List<Workstation> list = WorkstationScanner.scan(player.level(), player, player.blockPosition(), config);
         if (list.size() < 2) {
-            // Nothing else to tab to — stay invisible.
-            return deactivate();
+            // Nothing else to tab to — stay invisible (but keep retrying briefly).
+            clearActive();
+            return false;
         }
 
-        int idx = indexOf(list, anchor);
         ordered = list;
-        currentIndex = Math.max(0, idx);
+        currentIndex = Math.max(0, indexOf(list, anchor));
         active = true;
+        activationTicksLeft = 0;
 
         // Start the slide on the destination screen only if we arrived here via a switch.
-        slideStartMs = pendingSlide ? System.currentTimeMillis() : 0L;
+        slideStartMs = wasSwitch ? System.currentTimeMillis() : 0L;
         pendingSlide = false;
         return true;
     }
 
-    public static boolean deactivate() {
+    /**
+     * Pick the block this screen belongs to. For a switch we trust the target we set ourselves; for
+     * a fresh open we trust the click anchor if {@code UseBlockCallback} already fired, otherwise the
+     * block under the crosshair (which is the block that was just right-clicked to open the screen).
+     */
+    private static BlockPos resolveAnchor(LocalPlayer player, boolean wasSwitch, RemoteAccessConfig config) {
+        if (wasSwitch) {
+            return isWorkstationNear(player, pendingAnchor, config) ? pendingAnchor : null;
+        }
+        if (isWorkstationNear(player, pendingAnchor, config)) {
+            return pendingAnchor;
+        }
+        HitResult hit = Minecraft.getInstance().hitResult;
+        if (hit instanceof BlockHitResult blockHit) {
+            BlockPos pos = blockHit.getBlockPos();
+            if (isWorkstationNear(player, pos, config)) {
+                return pos;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isWorkstationNear(LocalPlayer player, BlockPos pos, RemoteAccessConfig config) {
+        if (pos == null) {
+            return false;
+        }
+        BlockState state = player.level().getBlockState(pos);
+        if (!WorkstationRegistry.isWorkstation(state, config)) {
+            return false;
+        }
+        double maxSq = config.searchRadius * config.searchRadius;
+        Vec3 eye = player.getEyePosition();
+        return eye.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= maxSq;
+    }
+
+    /** Clears the active overlay state but leaves the retry window intact. */
+    private static void clearActive() {
         active = false;
         ordered = List.of();
         currentIndex = 0;
         slideStartMs = 0L;
+    }
+
+    /** Full reset, used when the player leaves every switchable screen. */
+    public static boolean deactivate() {
+        clearActive();
+        activationTicksLeft = 0;
         pendingSlide = false;
+        pendingAnchor = null;
         return false;
     }
 

@@ -57,13 +57,16 @@ public class RemoteAccessClient implements ClientModInitializer {
 
     private void registerScreenHooks() {
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            // Only container-backed workstation screens participate.
-            if (!(screen instanceof AbstractContainerScreen<?>) || client.player == null) {
+            // Only server-opened container screens participate (containerId 0 is the player's own
+            // inventory, which we never want to treat as a workstation).
+            if (!isSwitchableScreen(screen) || client.player == null) {
                 NavState.deactivate();
                 return;
             }
 
-            NavState.activate(client.player);
+            // Begin a short retry window: UseBlockCallback can fire just after the screen inits,
+            // so the anchor may not be ready on this exact frame.
+            NavState.beginActivation(client.player);
 
             ScreenKeyboardEvents.allowKeyPress(screen).register((scr, keyEvent) -> {
                 if (!NavState.isActive() || isTextFieldFocused(scr)) {
@@ -107,12 +110,24 @@ public class RemoteAccessClient implements ClientModInitializer {
     private void registerTick() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             NavState.tick();
-            // Forget navigation once the player has fully left every screen (but not during the
-            // brief gap mid-switch, which NavState.tick() guards).
-            if (client.screen == null && NavState.isActive() && !NavState.inSwitch()) {
+            if (isSwitchableScreen(client.screen) && client.player != null) {
+                // Keep trying for a few ticks in case the anchor lands late.
+                NavState.retryTick(client.player);
+            } else if (NavState.isActive() && !NavState.inSwitch()) {
+                // Left every switchable screen (or the screen closed) — forget navigation, except
+                // during the brief mid-switch gap, which NavState guards.
                 NavState.deactivate();
             }
         });
+    }
+
+    /**
+     * A screen we can navigate from: a container screen whose menu was opened by the server
+     * ({@code containerId != 0}), which excludes the player's own inventory and creative menu.
+     */
+    private static boolean isSwitchableScreen(net.minecraft.client.gui.screens.Screen screen) {
+        return screen instanceof AbstractContainerScreen<?> containerScreen
+                && containerScreen.getMenu().containerId != 0;
     }
 
     private static boolean isTextFieldFocused(net.minecraft.client.gui.screens.Screen screen) {
