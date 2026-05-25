@@ -7,9 +7,11 @@ import com.sideaccess.client.workstation.WorkstationScanner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -38,6 +40,13 @@ public final class NavState {
 
     /** Ticks during which a screen-null state should NOT clear the anchor (mid-switch window). */
     private static int switchGuard = 0;
+
+    /** Direction (-1/+1) of the most recent switch — drives the slide direction. */
+    private static int lastSwitchDir = 1;
+    /** Wall-clock start of the current slide animation; 0 means "no slide running". */
+    private static long slideStartMs = 0L;
+    /** Set on a switch, consumed when the destination screen activates, to kick off its slide. */
+    private static boolean pendingSlide = false;
 
     private NavState() {}
 
@@ -78,6 +87,16 @@ public final class NavState {
         return ordered;
     }
 
+    /** Direction of the last switch: +1 (next) or -1 (previous). */
+    public static int lastSwitchDir() {
+        return lastSwitchDir;
+    }
+
+    /** Wall-clock millis when the current slide started, or 0 if none is running. */
+    public static long slideStartMs() {
+        return slideStartMs;
+    }
+
     /**
      * Try to (re)build navigation state for a freshly opened workstation screen.
      *
@@ -104,6 +123,10 @@ public final class NavState {
         ordered = list;
         currentIndex = Math.max(0, idx);
         active = true;
+
+        // Start the slide on the destination screen only if we arrived here via a switch.
+        slideStartMs = pendingSlide ? System.currentTimeMillis() : 0L;
+        pendingSlide = false;
         return true;
     }
 
@@ -111,6 +134,8 @@ public final class NavState {
         active = false;
         ordered = List.of();
         currentIndex = 0;
+        slideStartMs = 0L;
+        pendingSlide = false;
         return false;
     }
 
@@ -169,6 +194,12 @@ public final class NavState {
         pendingAnchor = target.pos();
         switchGuard = 5;
 
+        // Kick off the carousel feedback: remember the direction and play the swipe sound now
+        // (immediately, for responsiveness — the slide itself starts when the new screen opens).
+        lastSwitchDir = direction;
+        pendingSlide = true;
+        playSwitchSound(direction, config);
+
         // 1. Close the current handled screen (sends a legitimate container-close packet).
         mc.setScreen(null);
 
@@ -186,5 +217,16 @@ public final class NavState {
         // For menu-opening blocks the hit face is irrelevant to the outcome; aim at the block
         // centre with an upward face, which is always a well-formed interaction packet.
         return new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
+    }
+
+    private static void playSwitchSound(int direction, SideAccessConfig config) {
+        if (!config.playSound) {
+            return;
+        }
+        // Direction-aware pitch: a higher "swipe" for next, lower for previous.
+        // forUI signature is (sound, pitch, volume).
+        float pitch = direction > 0 ? 1.15f : 0.85f;
+        Minecraft.getInstance().getSoundManager().play(
+                SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, pitch, config.soundVolume));
     }
 }

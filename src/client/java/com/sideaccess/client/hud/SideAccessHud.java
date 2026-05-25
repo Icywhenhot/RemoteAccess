@@ -21,7 +21,16 @@ public final class SideAccessHud {
     private static final int FRAME_BG = 0xC0101010;
     private static final int FRAME_BORDER = 0xFF3C3C3C;
     private static final int FRAME_BORDER_HOVER = 0xFFFFFFFF;
+    private static final int LETTER_COLOR = 0xFFFFFFFF;
     private static final int MARGIN = 16;
+
+    // Slide-in (carousel) animation.
+    private static final long SLIDE_MS = 220L;
+    private static final int SLIDE_DISTANCE = 28;
+    // Gentle continuous bob of the A/D letters above the icons.
+    private static final double HOVER_PERIOD_MS = 1400.0;
+    private static final float HOVER_AMPLITUDE = 1.6f;
+    private static final int LETTER_GAP = 3;
 
     private SideAccessHud() {}
 
@@ -41,29 +50,57 @@ public final class SideAccessHud {
         int leftX = MARGIN;
         int rightX = screen.width - MARGIN - frame;
 
-        drawIcon(graphics, font, prev, leftX, y, frame, mouseX, mouseY, "A");
-        drawIcon(graphics, font, next, rightX, y, frame, mouseX, mouseY, "D");
+        long now = System.currentTimeMillis();
+        int slide = slideOffset(config, now);
+
+        // The two letters bob half a cycle apart so the pair feels alive rather than synchronized.
+        drawIcon(graphics, font, prev, leftX, slide, y, frame, mouseX, mouseY, "A", now, 0.0);
+        drawIcon(graphics, font, next, rightX, slide, y, frame, mouseX, mouseY, "D", now, Math.PI);
     }
 
     private static void drawIcon(GuiGraphicsExtractor graphics, Font font, Workstation ws,
-                                 int x, int y, int frame, int mouseX, int mouseY, String keyHint) {
-        boolean hover = mouseX >= x && mouseX < x + frame && mouseY >= y && mouseY < y + frame;
+                                 int restX, int slide, int y, int frame, int mouseX, int mouseY,
+                                 String letter, long now, double bobPhase) {
+        int x = restX + slide;
+        // Hover hit-test uses the resting position so highlighting doesn't jitter mid-slide.
+        boolean hover = mouseX >= restX && mouseX < restX + frame && mouseY >= y && mouseY < y + frame;
 
         graphics.fill(x, y, x + frame, y + frame, FRAME_BG);
-        int border = hover ? FRAME_BORDER_HOVER : FRAME_BORDER;
-        graphics.outline(x, y, frame, frame, border);
+        graphics.outline(x, y, frame, frame, hover ? FRAME_BORDER_HOVER : FRAME_BORDER);
 
         // Centre the 16x16 item render within the frame.
         int itemX = x + (frame - 16) / 2;
         int itemY = y + (frame - 16) / 2;
         graphics.item(ws.icon(), itemX, itemY);
 
-        // Key hint badge in the corner.
-        graphics.text(font, keyHint, x + 1, y - 1, 0xFFB0B0B0, false);
+        // Key letter centred above the icon, with a gentle vertical bob.
+        double bob = Math.sin(now / HOVER_PERIOD_MS * (Math.PI * 2.0) + bobPhase) * HOVER_AMPLITUDE;
+        int letterX = x + frame / 2;
+        int letterY = (int) Math.round(y - font.lineHeight - LETTER_GAP + bob);
+        graphics.centeredText(font, letter, letterX, letterY, LETTER_COLOR);
 
         if (hover) {
             graphics.setTooltipForNextFrame(ws.displayName(), mouseX, mouseY);
         }
+    }
+
+    /** Eased horizontal offset for the slide-in; 0 once the animation has finished. */
+    private static int slideOffset(SideAccessConfig config, long now) {
+        if (!config.slideAnimation) {
+            return 0;
+        }
+        long start = NavState.slideStartMs();
+        if (start <= 0L) {
+            return 0;
+        }
+        long elapsed = now - start;
+        if (elapsed < 0L || elapsed >= SLIDE_MS) {
+            return 0;
+        }
+        double p = (double) elapsed / SLIDE_MS;
+        double eased = 1.0 - Math.pow(1.0 - p, 3); // easeOutCubic
+        double amount = (1.0 - eased) * NavState.lastSwitchDir() * SLIDE_DISTANCE;
+        return (int) Math.round(amount);
     }
 
     /**

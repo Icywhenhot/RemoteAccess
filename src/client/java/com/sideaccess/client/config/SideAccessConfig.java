@@ -55,6 +55,15 @@ public final class SideAccessConfig {
     /** Draw the left/right navigation icons inside supported screens. */
     public boolean showIcons = true;
 
+    /** Play a directional "swipe" sound when switching workstations. */
+    public boolean playSound = true;
+
+    /** Volume of the swipe sound (0.0 - 1.0). */
+    public float soundVolume = 0.5f;
+
+    /** Slide the navigation icons in from the swipe direction on each switch. */
+    public boolean slideAnimation = true;
+
     /** Block IDs (e.g. {@code "minecraft:beacon"}) to never treat as a workstation. */
     public List<String> blacklist = new ArrayList<>();
 
@@ -138,6 +147,7 @@ public final class SideAccessConfig {
         if (searchRadius < 1) searchRadius = 1;
         if (reachLimit < 1) reachLimit = 1;
         if (iconSize < 8) iconSize = 8;
+        soundVolume = Math.max(0f, Math.min(1f, soundVolume));
     }
 
     public void save() {

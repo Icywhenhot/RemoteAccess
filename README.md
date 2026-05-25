@@ -51,6 +51,9 @@ Edit `config/sideaccess.json` (created on first launch).
 | `sortMode`          | `ANGULAR`   | `ANGULAR` (left→right sweep), `DISTANCE`, or `POSITION`.        |
 | `showSwitchMessage` | `true`      | Brief action-bar message naming the workstation switched to.   |
 | `showIcons`         | `true`      | Draw the left/right navigation icons.                          |
+| `slideAnimation`    | `true`      | Carousel slide-in of the icons, in the swipe direction.        |
+| `playSound`         | `true`      | Directional "swipe" sound on switch (higher pitch = next).     |
+| `soundVolume`       | `0.5`       | Swipe sound volume (0.0 - 1.0).                                |
 | `blacklist`         | `[]`        | Block IDs to ignore, e.g. `["minecraft:beacon"]`.              |
 
 **Key names** are human-readable: single letters/digits (`"A"`, `"5"`) or
