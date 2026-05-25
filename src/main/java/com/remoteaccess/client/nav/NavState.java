@@ -51,8 +51,8 @@ public final class NavState {
 
     /**
      * Remaining ticks to keep retrying activation after a switchable screen opens. Covers the case
-     * where {@link net.fabricmc.fabric.api.event.player.UseBlockCallback} fires slightly after the
-     * screen's init, so the anchor isn't ready on the very first frame.
+     * where the block-use interaction fires slightly after the screen's init, so the anchor isn't
+     * ready on the very first frame.
      */
     private static int activationTicksLeft = 0;
 
