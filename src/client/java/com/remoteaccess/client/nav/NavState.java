@@ -1,9 +1,9 @@
-package com.sideaccess.client.nav;
+package com.remoteaccess.client.nav;
 
-import com.sideaccess.client.config.SideAccessConfig;
-import com.sideaccess.client.workstation.Workstation;
-import com.sideaccess.client.workstation.WorkstationRegistry;
-import com.sideaccess.client.workstation.WorkstationScanner;
+import com.remoteaccess.client.config.RemoteAccessConfig;
+import com.remoteaccess.client.workstation.Workstation;
+import com.remoteaccess.client.workstation.WorkstationRegistry;
+import com.remoteaccess.client.workstation.WorkstationScanner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
@@ -107,7 +107,7 @@ public final class NavState {
         if (anchor == null) {
             return deactivate();
         }
-        SideAccessConfig config = SideAccessConfig.get();
+        RemoteAccessConfig config = RemoteAccessConfig.get();
         BlockState state = player.level().getBlockState(anchor);
         if (!WorkstationRegistry.isWorkstation(state, config)) {
             return deactivate();
@@ -176,7 +176,7 @@ public final class NavState {
         Workstation target = ordered.get(targetIndex);
 
         // Re-validate: the block may have been removed since we scanned.
-        SideAccessConfig config = SideAccessConfig.get();
+        RemoteAccessConfig config = RemoteAccessConfig.get();
         BlockState state = player.level().getBlockState(target.pos());
         if (!WorkstationRegistry.isWorkstation(state, config)) {
             // Drop the stale entry and retry once in the same direction.
@@ -209,7 +209,7 @@ public final class NavState {
         // 3. Optional subtle feedback (action-bar / overlay text).
         if (config.showSwitchMessage) {
             player.sendOverlayMessage(
-                    Component.translatable("sideaccess.switched", target.displayName()));
+                    Component.translatable("remoteaccess.switched", target.displayName()));
         }
     }
 
@@ -219,7 +219,7 @@ public final class NavState {
         return new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
     }
 
-    private static void playSwitchSound(int direction, SideAccessConfig config) {
+    private static void playSwitchSound(int direction, RemoteAccessConfig config) {
         if (!config.playSound) {
             return;
         }

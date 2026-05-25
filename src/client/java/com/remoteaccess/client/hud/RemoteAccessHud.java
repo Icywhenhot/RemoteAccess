@@ -1,8 +1,8 @@
-package com.sideaccess.client.hud;
+package com.remoteaccess.client.hud;
 
-import com.sideaccess.client.config.SideAccessConfig;
-import com.sideaccess.client.nav.NavState;
-import com.sideaccess.client.workstation.Workstation;
+import com.remoteaccess.client.config.RemoteAccessConfig;
+import com.remoteaccess.client.nav.NavState;
+import com.remoteaccess.client.workstation.Workstation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -12,7 +12,7 @@ import net.minecraft.client.gui.screens.Screen;
  * Draws the left ("previous") and right ("next") workstation icons on the edges of a supported
  * screen, with a subtle frame and hover tooltip. Pure rendering — no state of its own.
  */
-public final class SideAccessHud {
+public final class RemoteAccessHud {
 
     public static final int SIDE_PREV = -1;
     public static final int SIDE_NONE = 0;
@@ -32,9 +32,9 @@ public final class SideAccessHud {
     private static final float HOVER_AMPLITUDE = 1.6f;
     private static final int LETTER_GAP = 3;
 
-    private SideAccessHud() {}
+    private RemoteAccessHud() {}
 
-    public static void render(Screen screen, GuiGraphicsExtractor graphics, int mouseX, int mouseY, SideAccessConfig config) {
+    public static void render(Screen screen, GuiGraphicsExtractor graphics, int mouseX, int mouseY, RemoteAccessConfig config) {
         if (!config.showIcons || !NavState.isActive()) {
             return;
         }
@@ -85,7 +85,7 @@ public final class SideAccessHud {
     }
 
     /** Eased horizontal offset for the slide-in; 0 once the animation has finished. */
-    private static int slideOffset(SideAccessConfig config, long now) {
+    private static int slideOffset(RemoteAccessConfig config, long now) {
         if (!config.slideAnimation) {
             return 0;
         }
@@ -106,7 +106,7 @@ public final class SideAccessHud {
     /**
      * @return {@link #SIDE_PREV}, {@link #SIDE_NEXT}, or {@link #SIDE_NONE} for the given cursor.
      */
-    public static int iconHit(Screen screen, double mouseX, double mouseY, SideAccessConfig config) {
+    public static int iconHit(Screen screen, double mouseX, double mouseY, RemoteAccessConfig config) {
         if (!config.showIcons || !NavState.isActive()) {
             return SIDE_NONE;
         }

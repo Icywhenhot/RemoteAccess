@@ -1,6 +1,6 @@
-package com.sideaccess.client.workstation;
+package com.remoteaccess.client.workstation;
 
-import com.sideaccess.client.config.SideAccessConfig;
+import com.remoteaccess.client.config.RemoteAccessConfig;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -41,7 +41,7 @@ public final class WorkstationRegistry {
 
     private WorkstationRegistry() {}
 
-    public static boolean isWorkstation(BlockState state, SideAccessConfig config) {
+    public static boolean isWorkstation(BlockState state, RemoteAccessConfig config) {
         Block block = state.getBlock();
         if (!WORKSTATIONS.contains(block)) {
             return false;

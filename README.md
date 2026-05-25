@@ -1,10 +1,10 @@
-# Side Access
+# Remote Access
 
 A lightweight, client-side quality-of-life mod for Minecraft **26.1.2** (Fabric). It lets you tab
 between nearby workstations without ever closing the screen — your whole workshop behaves like tabs
 in one interface.
 
-Open one workstation normally (say, a crafting table). Side Access detects the other reachable
+Open one workstation normally (say, a crafting table). Remote Access detects the other reachable
 workstations around you and shows them as left/right navigation targets:
 
 ```
@@ -39,7 +39,7 @@ out of reach) will simply reject the switch.
 
 ## Configuration
 
-Edit `config/sideaccess.json` (created on first launch).
+Edit `config/remoteaccess.json` (created on first launch).
 
 | Key                 | Default     | Meaning                                                        |
 |---------------------|-------------|----------------------------------------------------------------|
@@ -71,9 +71,9 @@ Results are cached for the life of the screen. There is no ticking world-scan lo
 - `workstation/WorkstationRegistry` — single source of truth for "is this a workstation?"
 - `workstation/WorkstationScanner` — cubic scan, distance/reach filtering, ordering.
 - `nav/NavState` — live navigation state + the legitimate switch (close → re-interact).
-- `hud/SideAccessHud` — left/right icons, hover tooltips, click targets.
-- `config/SideAccessConfig` — JSON config.
-- `SideAccessClient` — wires Fabric screen/keyboard/mouse/use-block events together.
+- `hud/RemoteAccessHud` — left/right icons, hover tooltips, click targets.
+- `config/RemoteAccessConfig` — JSON config.
+- `RemoteAccessClient` — wires Fabric screen/keyboard/mouse/use-block events together.
 
 ## License
 

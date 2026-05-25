@@ -1,4 +1,4 @@
-package com.sideaccess.client.config;
+package com.remoteaccess.client.config;
 
 /**
  * Determines the order in which nearby workstations are arranged for prev/next cycling.

@@ -1,4 +1,4 @@
-package com.sideaccess.client.workstation;
+package com.remoteaccess.client.workstation;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;

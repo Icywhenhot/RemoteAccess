@@ -1,9 +1,9 @@
-package com.sideaccess.client;
+package com.remoteaccess.client;
 
-import com.sideaccess.client.config.SideAccessConfig;
-import com.sideaccess.client.hud.SideAccessHud;
-import com.sideaccess.client.nav.NavState;
-import com.sideaccess.client.workstation.WorkstationRegistry;
+import com.remoteaccess.client.config.RemoteAccessConfig;
+import com.remoteaccess.client.hud.RemoteAccessHud;
+import com.remoteaccess.client.nav.NavState;
+import com.remoteaccess.client.workstation.WorkstationRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -20,20 +20,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SideAccessClient implements ClientModInitializer {
+public class RemoteAccessClient implements ClientModInitializer {
 
-    public static final String MOD_ID = "sideaccess";
+    public static final String MOD_ID = "remoteaccess";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     @Override
     public void onInitializeClient() {
-        SideAccessConfig.get(); // load (or create) config eagerly
+        RemoteAccessConfig.get(); // load (or create) config eagerly
 
         registerAnchorTracking();
         registerScreenHooks();
         registerTick();
 
-        LOGGER.info("[Side Access] ready");
+        LOGGER.info("[Remote Access] ready");
     }
 
     /**
@@ -47,7 +47,7 @@ public class SideAccessClient implements ClientModInitializer {
                     && !player.isShiftKeyDown()) {
                 BlockPos pos = hitResult.getBlockPos();
                 BlockState state = world.getBlockState(pos);
-                if (WorkstationRegistry.isWorkstation(state, SideAccessConfig.get())) {
+                if (WorkstationRegistry.isWorkstation(state, RemoteAccessConfig.get())) {
                     NavState.setPendingAnchor(pos);
                 }
             }
@@ -69,7 +69,7 @@ public class SideAccessClient implements ClientModInitializer {
                 if (!NavState.isActive() || isTextFieldFocused(scr)) {
                     return true; // let the screen handle the key normally
                 }
-                SideAccessConfig config = SideAccessConfig.get();
+                RemoteAccessConfig config = RemoteAccessConfig.get();
                 int key = keyEvent.key();
                 if (key == config.prevKeyCode()) {
                     NavState.switchTo(-1);
@@ -86,12 +86,12 @@ public class SideAccessClient implements ClientModInitializer {
                 if (!NavState.isActive() || mouseEvent.button() != 0) {
                     return true;
                 }
-                int side = SideAccessHud.iconHit(scr, mouseEvent.x(), mouseEvent.y(), SideAccessConfig.get());
-                if (side == SideAccessHud.SIDE_PREV) {
+                int side = RemoteAccessHud.iconHit(scr, mouseEvent.x(), mouseEvent.y(), RemoteAccessConfig.get());
+                if (side == RemoteAccessHud.SIDE_PREV) {
                     NavState.switchTo(-1);
                     return false;
                 }
-                if (side == SideAccessHud.SIDE_NEXT) {
+                if (side == RemoteAccessHud.SIDE_NEXT) {
                     NavState.switchTo(1);
                     return false;
                 }
@@ -100,7 +100,7 @@ public class SideAccessClient implements ClientModInitializer {
 
             // 26.1.2 uses retained-mode rendering: overlays draw in the "extract" phase.
             ScreenEvents.afterExtract(screen).register((scr, graphics, mouseX, mouseY, tickDelta) ->
-                    SideAccessHud.render(scr, graphics, mouseX, mouseY, SideAccessConfig.get()));
+                    RemoteAccessHud.render(scr, graphics, mouseX, mouseY, RemoteAccessConfig.get()));
         });
     }
 

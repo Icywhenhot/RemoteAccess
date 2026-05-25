@@ -1,6 +1,6 @@
-package com.sideaccess.client.workstation;
+package com.remoteaccess.client.workstation;
 
-import com.sideaccess.client.config.SideAccessConfig;
+import com.remoteaccess.client.config.RemoteAccessConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -19,7 +19,7 @@ public final class WorkstationScanner {
 
     private WorkstationScanner() {}
 
-    public static List<Workstation> scan(Level level, Player player, BlockPos center, SideAccessConfig config) {
+    public static List<Workstation> scan(Level level, Player player, BlockPos center, RemoteAccessConfig config) {
         int radius = (int) Math.ceil(config.searchRadius);
         double maxDist = Math.min(config.searchRadius, config.reachLimit);
         double maxDistSq = maxDist * maxDist;
@@ -60,7 +60,7 @@ public final class WorkstationScanner {
         return found;
     }
 
-    private static Comparator<Workstation> comparator(com.sideaccess.client.config.SortMode mode) {
+    private static Comparator<Workstation> comparator(com.remoteaccess.client.config.SortMode mode) {
         return switch (mode) {
             case DISTANCE -> Comparator
                     .comparingDouble(Workstation::distSq)

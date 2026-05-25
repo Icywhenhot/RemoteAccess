@@ -1,4 +1,4 @@
-package com.sideaccess.client.config;
+package com.remoteaccess.client.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,11 +16,11 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Plain-data config, serialized to {@code config/sideaccess.json}. Loaded once at startup.
+ * Plain-data config, serialized to {@code config/remoteaccess.json}. Loaded once at startup.
  * Keybinds are stored as GLFW key codes (see {@link org.lwjgl.glfw.GLFW}).
  */
-public final class SideAccessConfig {
-    private static final Logger LOGGER = LoggerFactory.getLogger("sideaccess");
+public final class RemoteAccessConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger("remoteaccess");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     /** Cubic scan radius around the player, in blocks. */
@@ -70,7 +70,7 @@ public final class SideAccessConfig {
     private transient Integer prevKeyCode;
     private transient Integer nextKeyCode;
 
-    private static SideAccessConfig instance;
+    private static RemoteAccessConfig instance;
 
     /** Resolved GLFW key code for {@link #prevKey} (cached). */
     public int prevKeyCode() {
@@ -107,12 +107,12 @@ public final class SideAccessConfig {
         try {
             return GLFW.class.getField("GLFW_KEY_" + key).getInt(null);
         } catch (ReflectiveOperationException e) {
-            LOGGER.warn("[Side Access] Unknown key name '{}', falling back to default", name);
+            LOGGER.warn("[Remote Access] Unknown key name '{}', falling back to default", name);
             return fallback;
         }
     }
 
-    public static SideAccessConfig get() {
+    public static RemoteAccessConfig get() {
         if (instance == null) {
             instance = load();
         }
@@ -120,23 +120,23 @@ public final class SideAccessConfig {
     }
 
     private static Path path() {
-        return FabricLoader.getInstance().getConfigDir().resolve("sideaccess.json");
+        return FabricLoader.getInstance().getConfigDir().resolve("remoteaccess.json");
     }
 
-    private static SideAccessConfig load() {
+    private static RemoteAccessConfig load() {
         Path path = path();
         if (Files.exists(path)) {
             try {
-                SideAccessConfig cfg = GSON.fromJson(Files.readString(path), SideAccessConfig.class);
+                RemoteAccessConfig cfg = GSON.fromJson(Files.readString(path), RemoteAccessConfig.class);
                 if (cfg != null) {
                     cfg.sanitize();
                     return cfg;
                 }
             } catch (IOException | JsonSyntaxException e) {
-                LOGGER.warn("[Side Access] Could not read config, using defaults", e);
+                LOGGER.warn("[Remote Access] Could not read config, using defaults", e);
             }
         }
-        SideAccessConfig cfg = new SideAccessConfig();
+        RemoteAccessConfig cfg = new RemoteAccessConfig();
         cfg.save();
         return cfg;
     }
@@ -155,7 +155,7 @@ public final class SideAccessConfig {
             Files.createDirectories(path().getParent());
             Files.writeString(path(), GSON.toJson(this));
         } catch (IOException e) {
-            LOGGER.warn("[Side Access] Could not write config", e);
+            LOGGER.warn("[Remote Access] Could not write config", e);
         }
     }
 }
