@@ -265,7 +265,7 @@ public final class NavState {
         playSwitchSound(direction, config);
 
         // 1. Close the current handled screen (sends a legitimate container-close packet).
-        mc.setScreen(null);
+        mc.setScreenAndShow(null);
 
         // 2. Replay a real block interaction. Server validates reach and opens the target menu.
         gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hitResultFor(target.pos()));

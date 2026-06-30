@@ -101,7 +101,7 @@ public class RemoteAccessClient implements ClientModInitializer {
                 return true;
             });
 
-            // 26.1.2 uses retained-mode rendering: overlays draw in the "extract" phase.
+            // 26.2 uses retained-mode rendering: overlays draw in the "extract" phase.
             ScreenEvents.afterExtract(screen).register((scr, graphics, mouseX, mouseY, tickDelta) ->
                     RemoteAccessHud.render(scr, graphics, mouseX, mouseY, RemoteAccessConfig.get()));
         });
@@ -110,7 +110,7 @@ public class RemoteAccessClient implements ClientModInitializer {
     private void registerTick() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             NavState.tick();
-            if (isSwitchableScreen(client.screen) && client.player != null) {
+            if (isSwitchableScreen(client.gui.screen()) && client.player != null) {
                 // Keep trying for a few ticks in case the anchor lands late.
                 NavState.retryTick(client.player);
             } else if (NavState.isActive() && !NavState.inSwitch()) {

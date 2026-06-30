@@ -1,6 +1,6 @@
 # Remote Access
 
-A lightweight, client-side quality-of-life mod for Minecraft **26.1.2** (Fabric). It lets you tab
+A lightweight, client-side quality-of-life mod for Minecraft **26.2** (Fabric). It lets you tab
 between nearby workstations without ever closing the screen — your whole workshop behaves like tabs
 in one interface.
 
