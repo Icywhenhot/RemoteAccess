@@ -1,3 +1,31 @@
 {
-	"remoteaccess.switched": "Switched to %s"
+	"remoteaccess.switched": "Switched to %s",
+
+	"remoteaccess.config.title": "Remote Access",
+	"remoteaccess.config.category.general": "General",
+
+	"remoteaccess.config.searchRadius": "Search Radius",
+	"remoteaccess.config.searchRadius.tooltip": "Cubic scan radius around the player, in blocks.",
+	"remoteaccess.config.reachLimit": "Reach Limit",
+	"remoteaccess.config.reachLimit.tooltip": "Hard cap on switching distance, in blocks. Keep near vanilla reach (~4.5) so the server accepts the interaction.",
+	"remoteaccess.config.prevKey": "Previous Key",
+	"remoteaccess.config.prevKey.tooltip": "Key for \"previous workstation\". A GLFW key name without the GLFW_KEY_ prefix (e.g. A, LEFT, LEFT_BRACKET); single letters/digits work directly.",
+	"remoteaccess.config.nextKey": "Next Key",
+	"remoteaccess.config.nextKey.tooltip": "Key for \"next workstation\". Same format as Previous Key.",
+	"remoteaccess.config.iconSize": "Icon Size",
+	"remoteaccess.config.iconSize.tooltip": "Frame size of the on-screen navigation icons, in pixels.",
+	"remoteaccess.config.sortMode": "Sort Mode",
+	"remoteaccess.config.sortMode.tooltip": "Ordering strategy for the prev/next cycle.",
+	"remoteaccess.config.showSwitchMessage": "Show Switch Message",
+	"remoteaccess.config.showSwitchMessage.tooltip": "Show a brief action-bar message naming the workstation switched to.",
+	"remoteaccess.config.showIcons": "Show Icons",
+	"remoteaccess.config.showIcons.tooltip": "Draw the left/right navigation icons inside supported screens.",
+	"remoteaccess.config.playSound": "Play Sound",
+	"remoteaccess.config.playSound.tooltip": "Play a directional \"swipe\" sound when switching workstations.",
+	"remoteaccess.config.soundVolume": "Sound Volume",
+	"remoteaccess.config.soundVolume.tooltip": "Volume of the swipe sound (0.0 - 1.0).",
+	"remoteaccess.config.slideAnimation": "Slide Animation",
+	"remoteaccess.config.slideAnimation.tooltip": "Slide the navigation icons in from the swipe direction on each switch.",
+	"remoteaccess.config.blacklist": "Block Blacklist",
+	"remoteaccess.config.blacklist.tooltip": "Block IDs (e.g. minecraft:beacon) to never treat as a workstation."
 }

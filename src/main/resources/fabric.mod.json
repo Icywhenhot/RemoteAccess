@@ -17,6 +17,9 @@
 	"entrypoints": {
 		"client": [
 			"com.remoteaccess.client.RemoteAccessClient"
+		],
+		"modmenu": [
+			"com.remoteaccess.client.compat.ModMenuIntegration"
 		]
 	},
 	"depends": {
@@ -24,5 +27,9 @@
 		"minecraft": "~26.1.2",
 		"java": ">=25",
 		"fabric-api": "*"
+	},
+	"suggests": {
+		"modmenu": "*",
+		"cloth-config": "*"
 	}
 }

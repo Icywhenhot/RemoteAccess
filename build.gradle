@@ -12,6 +12,11 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+
+	// Mod Menu
+	maven { url = 'https://maven.terraformersmc.com/releases/' }
+	// Cloth Config
+	maven { url = 'https://maven.shedaniel.me/' }
 }
 
 loom {
@@ -34,7 +39,16 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-	
+
+	// Mod Menu — adds the in-game "Configure" button next to the mod entry. This loom version
+	// auto-remaps mod jars on the implementation configuration.
+	implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+
+	// Cloth Config — builds the actual config screen. Exclude its bundled fabric-api so it
+	// doesn't drag in a second copy alongside ours.
+	implementation("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
+		exclude(group: "net.fabricmc.fabric-api")
+	}
 }
 
 processResources {
