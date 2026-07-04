@@ -112,6 +112,20 @@ public final class RemoteAccessConfig {
         }
     }
 
+    /**
+     * Drop the cached key codes so the next {@link #prevKeyCode()}/{@link #nextKeyCode()} re-resolves
+     * from the (possibly just-edited) key names. Call after changing {@link #prevKey}/{@link #nextKey}.
+     */
+    public void invalidateKeyCache() {
+        prevKeyCode = null;
+        nextKeyCode = null;
+    }
+
+    /** Clamp out-of-range values to sane bounds. Exposed for the config screen's save step. */
+    public void clamp() {
+        sanitize();
+    }
+
     public static RemoteAccessConfig get() {
         if (instance == null) {
             instance = load();
